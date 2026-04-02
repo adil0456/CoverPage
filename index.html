@@ -75,8 +75,8 @@
 
     <div class="controls">
         <h3>Cover Page Settings</h3>
-        <label>Upload University Logo</label>
-        <input type="file" id="logoInput" accept="image/*" class="full-width">
+        <!-- <label>Upload University Logo</label>
+        <input type="file" id="logoInput" accept="image/*" class="full-width"> -->
         
         <label>Assignment Topic</label>
         <input type="text" id="inTitle" placeholder="The Future of Computer Science" class="full-width">
@@ -98,7 +98,7 @@
     </div>
 
     <div id="cover-page">
-        <img id="logo-preview" src="https://via.placeholder.com/400x200?text=Upload+University+Logo" alt="University Logo">
+        <img id="logo-preview" src="image.jpeg" alt="University Logo">
         
         <div class="assignment-title" id="outTitle">ASSIGNMENT TITLE</div>
 
@@ -121,17 +121,17 @@
 
     <script>
         // Handle Logo Upload
-        document.getElementById('logoInput').onchange = function (evt) {
-            var tgt = evt.target || window.event.srcElement,
-                files = tgt.files;
-            if (FileReader && files && files.length) {
-                var fr = new FileReader();
-                fr.onload = function () {
-                    document.getElementById('logo-preview').src = fr.result;
-                }
-                fr.readAsDataURL(files[0]);
-            }
-        }
+        // document.getElementById('logoInput').onchange = function (evt) {
+        //     var tgt = evt.target || window.event.srcElement,
+        //         files = tgt.files;
+        //     if (FileReader && files && files.length) {
+        //         var fr = new FileReader();
+        //         fr.onload = function () {
+        //             document.getElementById('logo-preview').src = fr.result;
+        //         }
+        //         fr.readAsDataURL(files[0]);
+        //     }
+        // }
 
         function updatePage() {
             document.getElementById('outTitle').innerText = document.getElementById('inTitle').value.toUpperCase() || "ASSIGNMENT TITLE";
