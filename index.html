@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Large Format Cover Page Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        body { font-family: 'Times New Roman', Times, serif; background: #dfe4ea; display: flex; flex-direction: column; align-items: center; padding: 40px; margin: 0; }
+        .controls { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); margin-bottom: 30px; width: 500px; font-family: sans-serif; }
+        .controls h3 { margin-top: 0; color: #222; border-bottom: 3px solid #007bff; padding-bottom: 10px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        input { width: 100%; padding: 12px; margin: 5px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 14px; }
+        .full-width { grid-column: span 2; }
+        label { font-size: 12px; font-weight: bold; color: #444; margin-top: 8px; display: block; text-transform: uppercase; }
+        button { width: 100%; padding: 15px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 15px; font-size: 16px; }
+        button:hover { background: #0056b3; }
+        .download-btn { background: #28a745; margin-top: 10px; }
+        
+        /* A4 Page Styling */
+        #cover-page { 
+            width: 794px; height: 1123px; 
+            background: white; padding: 60px 80px; box-sizing: border-box;
+            border: 15px double #000; position: relative; display: flex; flex-direction: column; align-items: center;
+        }
+
+        /* BIGGER LOGO */
+        #logo-preview { 
+            max-width: 400px; /* Increased from 200px */
+            max-height: 250px; 
+            margin-top: 20px;
+            margin-bottom: 50px; 
+            object-fit: contain; 
+        }
+
+        /* BIGGER TITLE */
+        .assignment-title { 
+            font-size: 38px; 
+            font-weight: bold; 
+            color: #000; 
+            margin: 60px 0; 
+            text-align: center; 
+            text-transform: uppercase; 
+            line-height: 1.3;
+            border-top: 2px solid #000;
+            border-bottom: 2px solid #000;
+            padding: 20px 0;
+            width: 90%;
+        }
+        
+        /* BIGGER STUDENT INFO */
+        .info-container { width: 100%; margin-top: 30px; padding-left: 40px; }
+        .info-group h4 { font-size: 26px; text-decoration: underline; margin-bottom: 25px; }
+        .info-row { 
+            display: flex; 
+            margin-bottom: 18px; 
+            font-size: 24px; /* Increased from 18px */
+            line-height: 1.4;
+        }
+        .label { width: 220px; font-weight: bold; }
+        .val { flex: 1; border-bottom: 1px dashed #ccc; }
+        
+        /* FOOTER DATE */
+        .footer-date { 
+            position: absolute; 
+            bottom: 100px; 
+            font-size: 24px; 
+            font-weight: bold; 
+            text-align: center; 
+            width: 80%; 
+        }
+    </style>
+</head>
+<body>
+
+    <div class="controls">
+        <h3>Cover Page Settings</h3>
+        <label>Upload University Logo</label>
+        <input type="file" id="logoInput" accept="image/*" class="full-width">
+        
+        <label>Assignment Topic</label>
+        <input type="text" id="inTitle" placeholder="The Future of Computer Science" class="full-width">
+        
+        <div class="grid">
+            <div><label>Student Name</label><input type="text" id="inName"></div>
+            <div><label>Student ID</label><input type="text" id="inID"></div>
+            <div><label>Faculty</label><input type="text" id="inFaculty"></div>
+            <div><label>Department</label><input type="text" id="inDept"></div>
+            <div><label>Batch</label><input type="text" id="inBatch"></div>
+            <div><label>Section</label><input type="text" id="inSec"></div>
+        </div>
+
+        <label>Submission Date</label>
+        <input type="date" id="inDate" class="full-width">
+
+        <button onclick="updatePage()">Update Preview</button>
+        <button class="download-btn" onclick="downloadImage()">Download PNG (High Res)</button>
+    </div>
+
+    <div id="cover-page">
+        <img id="logo-preview" src="https://via.placeholder.com/400x200?text=Upload+University+Logo" alt="University Logo">
+        
+        <div class="assignment-title" id="outTitle">ASSIGNMENT TITLE</div>
+
+        <div class="info-container">
+            <div class="info-group">
+                <h4>Student Information</h4>
+                <div class="info-row"><span class="label">Name:</span> <span class="val" id="outName"></span></div>
+                <div class="info-row"><span class="label">Student ID:</span> <span class="val" id="outID"></span></div>
+                <div class="info-row"><span class="label">Faculty:</span> <span class="val" id="outFaculty"></span></div>
+                <div class="info-row"><span class="label">Department:</span> <span class="val" id="outDept"></span></div>
+                <div class="info-row"><span class="label">Batch:</span> <span class="val" id="outBatch"></span></div>
+                <div class="info-row"><span class="label">Section:</span> <span class="val" id="outSec"></span></div>
+            </div>
+        </div>
+
+        <div class="footer-date">
+            Date of Submission: <span id="outDate"></span>
+        </div>
+    </div>
+
+    <script>
+        // Handle Logo Upload
+        document.getElementById('logoInput').onchange = function (evt) {
+            var tgt = evt.target || window.event.srcElement,
+                files = tgt.files;
+            if (FileReader && files && files.length) {
+                var fr = new FileReader();
+                fr.onload = function () {
+                    document.getElementById('logo-preview').src = fr.result;
+                }
+                fr.readAsDataURL(files[0]);
+            }
+        }
+
+        function updatePage() {
+            document.getElementById('outTitle').innerText = document.getElementById('inTitle').value.toUpperCase() || "ASSIGNMENT TITLE";
+            document.getElementById('outName').innerText = document.getElementById('inName').value || "_________________";
+            document.getElementById('outID').innerText = document.getElementById('inID').value || "_________________";
+            document.getElementById('outFaculty').innerText = document.getElementById('inFaculty').value || "_________________";
+            document.getElementById('outDept').innerText = document.getElementById('inDept').value || "_________________";
+            document.getElementById('outBatch').innerText = document.getElementById('inBatch').value || "_________________";
+            document.getElementById('outSec').innerText = document.getElementById('inSec').value || "_________________";
+            
+            const dateVal = document.getElementById('inDate').value;
+            document.getElementById('outDate').innerText = dateVal ? new Date(dateVal).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : "_________________";
+        }
+
+        function downloadImage() {
+            updatePage();
+            const cover = document.querySelector("#cover-page");
+            html2canvas(cover, {
+                scale: 3, // Even higher quality for printing
+                useCORS: true,
+                allowTaint: true
+            }).then(canvas => {
+                let link = document.createElement('a');
+                link.download = 'Cover_Page_Final.png';
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+            });
+        }
+    </script>
+</body>
+</html>
